@@ -1,0 +1,9 @@
+{% load thumbnail %}
+
+{% for image in images reversed %}
+    <a class='your_list__image' href="{{ image.get_absolute_url }}">
+        {% thumbnail image.image "480" crop="100%" as im %}
+            <div style="background: url({{ im.url }}) no-repeat center center;background-size:cover;"></div>
+        {% endthumbnail %}
+    </a>
+{% endfor %}

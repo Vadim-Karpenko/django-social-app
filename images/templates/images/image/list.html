@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% load thumbnail %}
+
+{% block title %}News{% endblock %}
+
+{% block content %}
+    <h1 style="text-align: center;">News</h1>
+    <div class="infinite-container">
+        {% if not actions %}
+            <h2>Sorry, but your friend never did any actions</h2>
+        {% else %}
+            {% for action in actions %}
+                {% with user=action.user profile=action.user.profile %}
+                    <div class="action infinite-item">
+                        <div class="images">
+                            {% if profile.photo %}
+                                {% thumbnail user.profile.photo "80x80" crop='100%' as im %}
+                                    <a href="{{ user.get_absolute_url }}">
+                                        <img src="{{ im.url }}" alt="{{ user.get_full_name }}" class="profile_photo">
+                                    </a>
+                                {% endthumbnail %}
+                            {% endif %}
+
+                            <a href="{{ user.get_absolute_url }}">{{ profile.get_full_name }}</a>
+                            {{ action.verb }}
+
+                            {% if action.target %}
+                                {% with target=action.target %}
+                                    {% if target.image %}
+                                        {% thumbnail target.image "480" crop="100%" as im %}
+                                            <a href="{{ target.get_absolute_url }}">
+                                                <img src="{{ im.url }}" class="uploaded_photo">
+                                            </a>
+                                        {% endthumbnail %}
+                                    {% endif %}
+                                {% endwith %}
+                            {% endif %}
+
+                            {% if action.target %}
+                                {% with target=action.target %}
+                                    <a href="{{ target.get_absolute_url }}">{{ target.profile.get_full_name }}</a>
+                                    {% thumbnail target.profile.photo "80x80" crop='100%' as im %}
+                                        <a href="{{ target.get_absolute_url }}">
+                                            <img src="{{ im.url }}" alt="{{ target.profile.get_full_name }}" class="profile_photo">
+                                        </a>
+                                    {% endthumbnail %}
+                                {% endwith %}
+                            {% endif %}
+                        </div>
+                        <div class="info">
+                            <p><span class='date'>{{ action.created|timesince }} ago</span></p>
+                        </div>
+
+                    </div>
+                {% endwith %}
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    {% if actions.has_next %}
+        <a class='infinite-more-link' href="?page={{ actions.next_page_number }}">Next</a>
+    {% endif %}
+{% endblock %}
+
+{% block domready %}
+    var infinite = new Waypoint.Infinite({
+      element: $('.infinite-container')[0]
+    });
+{% endblock %}

@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% load thumbnail %}
+
+{% block title %}{{ image.title }}{% endblock %}
+
+{% block content %}
+    <div class="detail-center">
+        <h1>"{{ image.title }}"</h1>
+        {% if image.user == request.user %}
+            <span class='delete-btn' data-id="{{ image.id }}" data-action="delete">Delete image</span>
+        {% endif %}
+        {% thumbnail image.image "1280" as im %}
+            <div class="image-full" style="background: url({{ im.url }}) no-repeat center center;background-size:contain;"></div>
+        {% endthumbnail %}
+        <!-- -->
+        {% with total_likes=image.users_like.count users_like=image.users_like.all %}
+            <div class="image-info">
+                <div class='like-info'>
+                    <span class='count'>{{ total_likes}}</span> like{{ total_likes|pluralize }}
+                    <span class='like like_button' data-id="{{ image.id }}" data-action="{% if request.user in users_like %}un{% endif %}like">
+                        {% if request.user not in users_like %}
+                            Like
+                        {% else %}
+                        <span class='unlike' style='font-size: 8px;color: white;line-height: 26px;'>
+                            Unlike
+                        </span>
+
+                        {% endif %}
+                    </span>
+
+
+                </div>
+                <div class="image-info">
+                    <span class='count-view'>{{ image.users_view.count }}</span>
+                    view{{ image.users_view.count|pluralize }}
+                </div>
+                {{ image.description|linebreaks }}
+            </div>
+
+            <div class="image-likes">
+                <div class="hidden_like" style="display: none;">
+                    {% thumbnail user.profile.photo "150x150" as im %}
+                        <div class='profile_link_in_likes' style="background: url({{ im.url }}) no-repeat center center; background-size:cover;"></div>
+                    {% endthumbnail %}
+
+                    <p>{{ your_name }}</p>
+                </div>
+                {% for user in image.users_like.all %}
+                    <div class='profile_data'>
+                        {% thumbnail user.profile.photo "150x150" as im %}
+                            <div class='profile_link_in_likes' style="background: url({{ im.url }}) no-repeat center center; background-size:cover;"></div>
+                        {% endthumbnail %}
+                        <p>{{ user.profile.get_full_name }}</p>
+                    </div>
+                    {% empty %}
+                {% endfor %}
+            </div>
+        {% endwith %}
+
+        {% with comments.count as total_comments %}
+            <h2>{{ total_comments }} coment{{ total_comments|pluralize }}</h2>
+        {% endwith %}
+
+        {% for comment in comments %}
+            <div class="comment">
+                <p class='info'>Comment by <a href="{{ comment.user.get_absolute_url }}">{{ comment.user.profile.get_full_name }}</a> {{ comment.created }}</p>
+                {{ comment.body|linebreaks }}
+            </div>
+        {% empty %}
+            <p>There are no comments yet.</p>
+        {% endfor %}
+
+        {% if user.is_authenticated %}
+            {% if new_comment %}
+                <h2>Your comment has been added.</h2>
+            {% else %}
+                <h2>Add a new comment</h2>
+                <form action="." method="post">
+                    {{ comment_form.as_p }}
+                    {% csrf_token %}
+                    <p><input type="submit" value="Add comment"></p>
+                </form>
+            {% endif %}
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block domready %}
+    $('span.like').click(function(e){
+        e.preventDefault();
+        $.post('{% url "images:like" %}',
+            {
+                id: $(this).data('id'),
+                action: $(this).data('action')
+            },
+            function(data){
+
+                if (data['status'] == 'ok')
+                {
+                    var previous_action = $('span.like').data('action');
+
+                    // toggle data-action
+                    $('span.like').data('action', previous_action == 'like' ? 'unlike' : 'like');
+                    // toggle link text
+                    $('span.like').text(previous_action == 'like' ? 'Unlike' : 'Like');
+                    if (previous_action == 'like') {
+                        $('span.like').css('font-size', 8);
+                    } else {
+                        $('span.like').css('font-size', 9.3);
+                    };
+
+                    // update total likes
+                    var previous_likes = parseInt($('.count').text());
+                    $('.count').text(previous_action == 'like' ? previous_likes + 1 : previous_likes - 1);
+
+                    // if selector .profile_data has selector p with your username, it will toggle
+                    {% if user not in image.users_like.all %}
+                        $(".hidden_like").toggle();
+                    {% else %}
+                        $(".profile_data:first:has(p:contains({{ your_name }}))").toggle();
+                    {% endif %}
+                }
+            });
+
+    });
+
+    $('span.delete-btn').click(function(e){
+        e.preventDefault();
+        $.post('{% url "images:image_delete" %}',
+            {
+                id: $(this).data('id'),
+                action: $(this).data('action')
+            });
+    });
+{% endblock %}

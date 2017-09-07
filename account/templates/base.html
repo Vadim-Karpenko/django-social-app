@@ -1,0 +1,88 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% block title %}{% endblock %}</title>
+        <link rel="stylesheet" href="{% static "css/base.css" %}">
+
+        <script src="{% static '/js/jquery-3.2.1.min.js' %}"></script>
+        <script src="{% static '/js/jquery.cookie-1.4.1.min.js' %}"></script>
+        <script src="{% static '/js/jquery.waypoints.min.js' %}"></script>
+        <script src="{% static '/js/infinite.min.js' %}"></script>
+
+        <META HTTP-EQUIV="CACHE-CONTROL" CONTENT="NO-CACHE">
+    </head>
+
+    <body>
+    <div id="header">
+            <span class="logo">Photogram</span>
+
+        {% if request.user.is_authenticated %}
+            <ul class="menu">
+                <li {% if section == 'profile' %} class='selected' {% endif %} >
+                    <a href="{{ request.user.get_absolute_url }}">Profile</a>
+                </li>
+
+                <li {% if section == 'images' %} class='selected' {% endif %}>
+                    <a href="{% url 'images:list' %}">News</a>
+                </li>
+
+                <li {% if section == 'people' %} class='selected' {% endif %}>
+                    <a href="{% url 'user_list' %}">People</a>
+                </li>
+            </ul>
+        {% endif %}
+
+        <span class="user">
+            {% if request.user.is_authenticated %}
+                Hello {{ request.user.username }}, <a href="{% url "logout" %}">Logout</a>
+            {% else %}
+                    <a href="{% url "login" %}">Log-in</a>
+                    <a id='register_button' href="{% url "register" %}">Register</a>
+            {% endif %}
+        </span>
+    </div>
+
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li class='{{ message.tags }}'>
+                    {{ message|safe }}
+                    <a href="#" class='close '></a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <div id="content">
+        {% block content %}
+        {% endblock %}
+    </div>
+
+
+
+    <script>
+        var csrftoken = $.cookie('csrftoken');
+        function csrfSafeMethod(method) {
+            // these HTTP methods do not require CSRF protection
+            return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+        }
+        $.ajaxSetup({
+            beforeSend: function(xhr, settings) {
+                if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                }
+            }
+        });
+
+        $(document).ready(function(){
+            {% block domready %}
+            {% endblock %}
+		});
+    </script>
+
+
+    </body>
+</html>
