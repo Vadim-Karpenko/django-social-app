@@ -1,20 +1,18 @@
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import User
-
+from sorl.thumbnail import ImageField
 
 class Profile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL)
-    first_name = models.CharField(max_length=60)
-    last_name = models.CharField(max_length=60)
     date_of_birth = models.DateField('Your date of birth (YYYY-MM-DD)', blank=True, null=True)
-    photo = models.ImageField('', upload_to='users/%Y/%m/%d', default='users/default-photo.jpg')
+    photo = ImageField('', upload_to='users/%Y/%m/%d', default='users/default-photo.jpg')
 
     def __str__(self):
         return 'Profile for user {}'.format(self.user.username)
 
     def get_full_name(self):
-        return str(self.first_name) + ' ' + str(self.last_name)
+        return str(self.user.first_name) + ' ' + str(self.user.last_name)
 
 class Contact(models.Model):
     user_from = models.ForeignKey(User, related_name='rel_from_set')

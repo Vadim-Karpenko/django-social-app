@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login
-from .forms import LoginForm, UserRegistrationForm, UserEditForm, ProfileEditForm, UserRegistrationFullNameForm
+from .forms import LoginForm, UserRegistrationForm, UserEditForm, ProfileEditForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from .models import Profile, Contact
@@ -46,8 +46,7 @@ def register(request):
                     {'new_user': new_user})
     else:
         user_form = UserRegistrationForm()
-        profile_form = UserRegistrationFullNameForm()
-    return render(request, 'account/register.html', {'user_form': user_form, 'profile_form': profile_form})
+    return render(request, 'account/register.html', {'user_form': user_form})
 
 @login_required
 def edit(request):

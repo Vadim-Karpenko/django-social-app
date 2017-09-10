@@ -14,7 +14,7 @@ class UserRegistrationForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ('username', 'email')
+        fields = ('username', 'email', 'first_name', 'last_name')
 
     def clean_password2(self):
         cd = self.cleaned_data
@@ -22,15 +22,11 @@ class UserRegistrationForm(forms.ModelForm):
             raise forms.ValidationError('Passwords don\'t match.')
         return cd['password2']
 
-class UserRegistrationFullNameForm(forms.ModelForm):
-    class Meta:
-        model = Profile
-        fields = ('first_name', 'last_name')
 
 class UserEditForm(forms.ModelForm):
     class Meta:
         model = User
-        fields = ('email',)
+        fields = ('email', 'first_name', 'last_name',)
 
 class ProfileEditForm(forms.ModelForm):
     # make tuple looks like ['1900', '1901', ... '2017']
@@ -49,4 +45,4 @@ class ProfileEditForm(forms.ModelForm):
     )
     class Meta:
         model = Profile
-        fields = ('first_name', 'last_name', 'date_of_birth', 'photo')
+        fields = ( 'date_of_birth', 'photo')

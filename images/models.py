@@ -2,12 +2,12 @@ from django.db import models
 from django.conf import settings
 from django.utils.text import slugify
 from django.core.urlresolvers import reverse
-from sorl.thumbnail import delete as delete_thumbnails
+from sorl.thumbnail import delete as delete_thumbnails, ImageField
 
 class Image(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='images_created')
     title = models.CharField(max_length=240)
-    image = models.ImageField(upload_to='images/%Y/%m/%d')
+    image = ImageField(upload_to='images/%Y/%m/%d')
     created = models.DateTimeField(auto_now_add=True, db_index=True, blank=True)
     users_like = models.ManyToManyField(settings.AUTH_USER_MODEL,
                                         related_name='images_liked',

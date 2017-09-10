@@ -7,7 +7,7 @@
     <h1 style="text-align: center;">News</h1>
     <div class="infinite-container">
         {% if not actions %}
-            <h2>Sorry, but your friend never did any actions</h2>
+            <h2>Here will be show any actions</h2>
         {% else %}
             {% for action in actions %}
                 {% with user=action.user profile=action.user.profile %}
@@ -38,7 +38,7 @@
 
                             {% if action.target %}
                                 {% with target=action.target %}
-                                    <a href="{{ target.get_absolute_url }}">{{ target.profile.get_full_name }}</a>
+                                    <a href="{{ target.get_absolute_url }}">{{ target.get_full_name }}</a>
                                     {% thumbnail target.profile.photo "80x80" crop='100%' as im %}
                                         <a href="{{ target.get_absolute_url }}">
                                             <img src="{{ im.url }}" alt="{{ target.profile.get_full_name }}" class="profile_photo">
